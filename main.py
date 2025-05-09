@@ -21,6 +21,15 @@ app.add_middleware(
     allow_headers=["*"],
 )
 
+@app.get("/")
+async def root():
+    return {
+        "message": "Welcome to Todo API",
+        "docs_url": "/docs",
+        "redoc_url": "/redoc",
+        "api_version": "1.0.0"
+    }
+
 # Include routers
 app.include_router(todo_routes.router)
 
