@@ -1,35 +1,38 @@
-from fastapi import FastAPI
+from fastapi import FastAPI, HTTPException
 from fastapi.middleware.cors import CORSMiddleware
+from fastapi.responses import JSONResponse
 from app.routes import todo_routes
-from app.database import engine, Base
+import psycopg2
+import sqlalchemy
+from app.persistence.models import db
+import os
+from dotenv import load_dotenv
+import sys
+sys.dont_write_bytecode = True
 
-# Create database tables
-Base.metadata.create_all(bind=engine)
+load_dotenv()
 
 app = FastAPI(
-    title="Todo API",
-    description="A simple Todo API built with FastAPI",
+    title="Todo App",
+    description="A simple Todo application with FastAPI",
     version="1.0.0"
 )
 
-# Configure CORS
 app.add_middleware(
     CORSMiddleware,
-    allow_origins=["*"],  # In production, replace with specific origins
+    allow_origins=["*"],
     allow_credentials=True,
     allow_methods=["*"],
     allow_headers=["*"],
 )
 
-@app.get("/")
-async def root():
-    return {
-        "message": "Welcome to Todo API",
-        "docs_url": "/docs",
-        "redoc_url": "/redoc",
-        "api_version": "1.0.0"
-    }
+@app.on_event("startup")
+async def startup():
+    db.init(app)
+
+@app.on_event("shutdown")
+async def shutdown():
+    pass
 
 # Include routers
 app.include_router(todo_routes.router)
-

@@ -1,42 +1,60 @@
-from fastapi import APIRouter, Depends, HTTPException, Query
-from sqlalchemy.orm import Session
-from typing import List, Optional
-from app.database import get_db
-from app.schemas.todo import Todo, TodoCreate, TodoUpdate
+from fastapi import APIRouter, HTTPException
 from app.services.todo_service import TodoService
+from typing import List, Optional
+from pydantic import BaseModel
 
 router = APIRouter(prefix="/todos", tags=["todos"])
+todo_service = TodoService()
 
-@router.post("/", response_model=Todo)
-def create_todo(todo: TodoCreate, db: Session = Depends(get_db)):
-    return TodoService.create_todo(db, todo)
+class TodoCreate(BaseModel):
+    title: str
 
-@router.get("/", response_model=List[Todo])
-def get_todos(
-    skip: int = Query(0, ge=0),
-    limit: int = Query(100, ge=1, le=100),
-    completed: Optional[bool] = None,
-    priority: Optional[int] = Query(None, ge=1, le=3),
-    db: Session = Depends(get_db)
-):
-    return TodoService.get_todos(db, skip, limit, completed, priority)
+class TodoUpdate(BaseModel):
+    title: Optional[str] = None
+    completed: Optional[bool] = None
 
-@router.get("/{todo_id}", response_model=Todo)
-def get_todo(todo_id: int, db: Session = Depends(get_db)):
-    todo = TodoService.get_todo(db, todo_id)
-    if not todo:
-        raise HTTPException(status_code=404, detail="Todo not found")
-    return todo
+@router.get("/")
+async def get_todos():
+    try:
+        return todo_service.get_all_todos()
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=str(e))
 
-@router.put("/{todo_id}", response_model=Todo)
-def update_todo(todo_id: int, todo: TodoUpdate, db: Session = Depends(get_db)):
-    updated_todo = TodoService.update_todo(db, todo_id, todo)
-    if not updated_todo:
-        raise HTTPException(status_code=404, detail="Todo not found")
-    return updated_todo
+@router.get("/{todo_id}")
+async def get_todo(todo_id: int):
+    try:
+        todo = todo_service.get_todo(todo_id)
+        if not todo:
+            raise HTTPException(status_code=404, detail="Todo not found")
+        return todo
+    except ValueError as e:
+        raise HTTPException(status_code=404, detail=str(e))
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=str(e))
+
+@router.post("/")
+async def create_todo(todo: TodoCreate):
+    try:
+        return todo_service.create_todo(todo.title)
+    except ValueError as e:
+        raise HTTPException(status_code=400, detail=str(e))
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=str(e))
+
+@router.put("/{todo_id}")
+async def update_todo(todo_id: int, todo: TodoUpdate):
+    try:
+        return todo_service.update_todo(todo_id, todo.title, todo.completed)
+    except ValueError as e:
+        raise HTTPException(status_code=404, detail=str(e))
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=str(e))
 
 @router.delete("/{todo_id}")
-def delete_todo(todo_id: int, db: Session = Depends(get_db)):
-    if not TodoService.delete_todo(db, todo_id):
-        raise HTTPException(status_code=404, detail="Todo not found")
-    return {"message": "Todo deleted successfully"} 
+async def delete_todo(todo_id: int):
+    try:
+        return todo_service.delete_todo(todo_id)
+    except ValueError as e:
+        raise HTTPException(status_code=404, detail=str(e))
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=str(e))

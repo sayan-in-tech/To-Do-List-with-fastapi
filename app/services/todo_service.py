@@ -1,59 +1,31 @@
-from sqlalchemy.orm import Session
-from app.models.todo import Todo
-from app.schemas.todo import TodoCreate, TodoUpdate
-from typing import List, Optional
-from datetime import datetime
+from app.persistence.repository import TodoRepository
 
 class TodoService:
-    @staticmethod
-    def create_todo(db: Session, todo: TodoCreate) -> Todo:
-        db_todo = Todo(**todo.model_dump())
-        db.add(db_todo)
-        db.commit()
-        db.refresh(db_todo)
-        return db_todo
+    def __init__(self):
+        self.repository = TodoRepository()
 
-    @staticmethod
-    def get_todos(
-        db: Session,
-        skip: int = 0,
-        limit: int = 100,
-        completed: Optional[bool] = None,
-        priority: Optional[int] = None
-    ) -> List[Todo]:
-        query = db.query(Todo)
-        
-        if completed is not None:
-            query = query.filter(Todo.completed == completed)
-        if priority is not None:
-            query = query.filter(Todo.priority == priority)
-            
-        return query.offset(skip).limit(limit).all()
+    def get_all_todos(self):
+        todos = self.repository.get_all()
+        return [todo.to_dict() for todo in todos]
 
-    @staticmethod
-    def get_todo(db: Session, todo_id: int) -> Optional[Todo]:
-        return db.query(Todo).filter(Todo.id == todo_id).first()
+    def get_todo(self, todo_id):
+        todo = self.repository.get_by_id(todo_id)
+        return todo.to_dict() if todo else None
 
-    @staticmethod
-    def update_todo(db: Session, todo_id: int, todo: TodoUpdate) -> Optional[Todo]:
-        db_todo = TodoService.get_todo(db, todo_id)
-        if not db_todo:
-            return None
+    def create_todo(self, title):
+        if not title:
+            raise ValueError("Title cannot be empty")
+        todo = self.repository.create(title)
+        return todo.to_dict()
 
-        update_data = todo.model_dump(exclude_unset=True)
-        for field, value in update_data.items():
-            setattr(db_todo, field, value)
+    def update_todo(self, todo_id, title=None, completed=None):
+        todo = self.repository.update(todo_id, title, completed)
+        if not todo:
+            raise ValueError(f"Todo with id {todo_id} not found")
+        return todo.to_dict()
 
-        db.commit()
-        db.refresh(db_todo)
-        return db_todo
-
-    @staticmethod
-    def delete_todo(db: Session, todo_id: int) -> bool:
-        db_todo = TodoService.get_todo(db, todo_id)
-        if not db_todo:
-            return False
-
-        db.delete(db_todo)
-        db.commit()
-        return True 
+    def delete_todo(self, todo_id):
+        todo = self.repository.delete(todo_id)
+        if not todo:
+            raise ValueError(f"Todo with id {todo_id} not found")
+        return todo.to_dict()
