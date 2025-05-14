@@ -115,6 +115,8 @@ class TodoService:
             if not todo:
                 raise ValueError(f"Todo with id {todo_id} not found")
             return todo.to_dict()
+        except ValueError as e:
+            raise e
         except Exception as e:
             raise Exception(f"Failed to update todo: {str(e)}")
 
@@ -132,8 +134,11 @@ class TodoService:
     def check_everything(self):
         try:
             todo_routes.create_todo("test")
-            todo_id = todo_routes.todo_service.get_all_todos()[-1]["id"]
-            
+            todos = todo_routes.todo_service.get_all_todos()
+            if not todos:
+                raise ValueError("No todos available to test.")
+            todo_id = todos[-1]["id"]
+
             try:
                 print(todo_routes.get_all_todos())
             except Exception as e:
@@ -150,6 +155,7 @@ class TodoService:
                 print(todo_routes.delete_todo(todo_id))
             except Exception as e:
                 print(f"Error deleting todo: {str(e)}")
+                
             return "Everything is working.\n However, this test does not check for whether the database exists or not."
         except Exception as e:
             raise e

@@ -14,13 +14,19 @@ class TodoCreate(BaseModel):
     title: str
 
 class TodoUpdate(BaseModel):
-    todo_id: Optional[int] = None
-    completed: Optional[bool] = None
+    completed: bool = None
 
 @router.get("/get_all_todos")
 async def get_all_todos():
     try:
         return todo_service.get_all_todos()
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=str(e))
+
+@router.get("/check_everything")
+async def check_everything():
+    try:
+        return todo_service.check_everything()
     except Exception as e:
         raise HTTPException(status_code=500, detail=str(e))
 
@@ -62,14 +68,3 @@ async def delete_todo(todo_id: int):
         raise HTTPException(status_code=404, detail=str(e))
     except Exception as e:
         raise HTTPException(status_code=500, detail=str(e))
-
-@router.get("/check_everything")
-async def check_everything():
-    try:
-        return todo_service.check_everything()
-    except Exception as e:
-        raise HTTPException(status_code=500, detail=str(e))
-    except ValueError as e:
-        raise HTTPException(status_code=400, detail=str(e))
-    except TypeError as e:
-        raise HTTPException(status_code=404, detail=str(e))
