@@ -3,6 +3,10 @@ from app.services.todo_service import TodoService
 from typing import List, Optional
 from pydantic import BaseModel
 
+
+import sys
+sys.dont_write_bytecode = True
+
 router = APIRouter(prefix="/todos", tags=["todos"])
 todo_service = TodoService()
 
