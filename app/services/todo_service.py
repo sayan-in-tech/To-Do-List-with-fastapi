@@ -133,29 +133,44 @@ class TodoService:
         
     def check_everything(self):
         try:
-            todo_routes.create_todo("test")
-            todos = todo_routes.todo_service.get_all_todos()
+            # Create a test todo
+            test_todo = self.create_todo("test")
+            if not test_todo:
+                raise ValueError("Failed to create test todo")
+            
+            # Get all todos
+            todos = self.get_all_todos()
             if not todos:
                 raise ValueError("No todos available to test.")
-            todo_id = todos[-1]["id"]
-
-            try:
-                print(todo_routes.get_all_todos())
-            except Exception as e:
-                print(f"Error getting all todos: {str(e)}")
-            try:
-                print(todo_routes.update_todo(todo_id, True))
-            except Exception as e:
-                print(f"Error updating todo: {str(e)}")
-            try:
-                print(todo_routes.get_todo(todo_id))
-            except Exception as e:
-                print(f"Error getting todo by id: {str(e)}")
-            try:
-                print(todo_routes.delete_todo(todo_id))
-            except Exception as e:
-                print(f"Error deleting todo: {str(e)}")
-                
-            return "Everything is working.\n However, this test does not check for whether the database exists or not."
+            
+            todo_id = test_todo["id"]
+            
+            # Test getting all todos
+            all_todos = self.get_all_todos()
+            print("All todos:", all_todos)
+            
+            # Test updating todo
+            updated_todo = self.update_todo(todo_id, True)
+            print("Updated todo:", updated_todo)
+            
+            # Test getting specific todo
+            specific_todo = self.get_todo(todo_id)
+            print("Specific todo:", specific_todo)
+            
+            # Test deleting todo
+            deleted_todo = self.delete_todo(todo_id)
+            print("Deleted todo:", deleted_todo)
+            
+            return {
+                "status": "success",
+                "message": "All API endpoints are working correctly",
+                "details": {
+                    "created": test_todo,
+                    "all_todos": all_todos,
+                    "updated": updated_todo,
+                    "retrieved": specific_todo,
+                    "deleted": deleted_todo
+                }
+            }
         except Exception as e:
-            raise e
+            raise Exception(f"Test failed: {str(e)}")
