@@ -3,8 +3,8 @@ from typing import List
 from fastapi import Depends, FastAPI, HTTPException
 from sqlalchemy.orm import Session
 
-from fastapi_crud import models, schemas  # Changed import
-from fastapi_crud.database import SessionLocal, engine, get_db # Changed import
+from fastapi_crud_template import models, schemas  # Changed import
+from fastapi_crud_template.database import SessionLocal, engine, get_db # Changed import
 
 models.Base.metadata.create_all(bind=engine)
 
