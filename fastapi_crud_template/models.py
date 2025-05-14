@@ -1,6 +1,9 @@
 from sqlalchemy import Column, Integer, String
 from .database import Base
 
+import sys
+sys.dont_write_bytecode = True
+
 class Item(Base):
     __tablename__ = "items"
 

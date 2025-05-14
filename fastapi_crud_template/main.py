@@ -5,6 +5,8 @@ from sqlalchemy.orm import Session
 
 from fastapi_crud_template import models, schemas  # Changed import
 from fastapi_crud_template.database import SessionLocal, engine, get_db # Changed import
+import sys
+sys.dont_write_bytecode = True
 
 models.Base.metadata.create_all(bind=engine)
 

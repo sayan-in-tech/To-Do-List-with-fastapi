@@ -2,6 +2,9 @@ from sqlalchemy import create_engine
 from sqlalchemy.ext.declarative import declarative_base
 from sqlalchemy.orm import sessionmaker
 
+import sys
+sys.dont_write_bytecode = True
+
 # Replace with your PostgreSQL database URL
 SQLALCHEMY_DATABASE_URL = "postgresql://postgres:qwerty@localhost:5432/postgres"
 

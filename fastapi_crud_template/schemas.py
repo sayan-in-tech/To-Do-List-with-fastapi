@@ -1,6 +1,9 @@
 from pydantic import BaseModel
 from typing import Optional
 
+import sys
+sys.dont_write_bytecode = True
+
 class ItemBase(BaseModel):
     name: str
     description: Optional[str] = None
