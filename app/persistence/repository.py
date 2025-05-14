@@ -17,13 +17,11 @@ class TodoRepository:
         db.session.commit()
         return todo
     
-    def update(self, todo_id, title=None, completed=None):
+    def update(self, todo_id, completed=None):
         todo = db.session.query(Todo).get(todo_id)
         if not todo:
             return None
         
-        if title is not None:
-            todo.title = title
         if completed is not None:
             todo.completed = completed
         
