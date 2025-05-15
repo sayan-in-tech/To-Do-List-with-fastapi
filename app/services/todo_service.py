@@ -7,6 +7,8 @@ from app.persistence.models import db, Base
 from app.persistence.repository import TodoRepository
 from app.routes import todo_routes
 
+load_dotenv()
+
 sys.dont_write_bytecode = True
 
 class TodoService:
@@ -30,8 +32,7 @@ class TodoService:
     def _create_database_if_not_exists(self):
         """Create the database if it doesn't exist."""
         # Default database URL if not set in environment
-        DEFAULT_DATABASE_URL = "postgresql://postgres:postgres@localhost:5432/todo_db"
-        database_url = os.getenv("DATABASE_URL", DEFAULT_DATABASE_URL)
+        database_url = os.getenv("DATABASE_URL")
         
         # Extract database name from URL
         db_name = database_url.split('/')[-1]
@@ -147,19 +148,19 @@ class TodoService:
             
             # Test getting all todos
             all_todos = self.get_all_todos()
-            print("All todos:", all_todos)
+            print("\nAll todos shown successfully")
             
             # Test updating todo
             updated_todo = self.update_todo(todo_id, True)
-            print("Updated todo:", updated_todo)
+            print("\nUpdated todo with ID:", todo_id)
             
             # Test getting specific todo
             specific_todo = self.get_todo(todo_id)
-            print("Specific todo:", specific_todo)
+            print("\nSpecific todo shown successfully")
             
             # Test deleting todo
             deleted_todo = self.delete_todo(todo_id)
-            print("Deleted todo:", deleted_todo)
+            print("\nDeleted todo with ID:", todo_id, "\n\n")
             
             return {
                 "status": "success",
